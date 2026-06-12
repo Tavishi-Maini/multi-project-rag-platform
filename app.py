@@ -413,7 +413,7 @@ def get_recent_projects():
 
 def main():
     load_dotenv()
-    st.set_page_config(page_title="My Streamlit App", page_icon=":books:", layout="centered")
+    st.set_page_config(page_title="Multi-Project RAG Platform", page_icon="📁", layout="centered")
     st.write(css, unsafe_allow_html=True)
     
     if "summary" not in st.session_state:
