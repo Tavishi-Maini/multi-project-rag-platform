@@ -1,0 +1,15 @@
+.venv/
+**pycache**/
+.env
+
+projects/
+faiss_index/
+
+*.pyc
+*.pkl
+
+.streamlit/secrets.toml
+
+DS_Store
+.idea/
+.vscode/
