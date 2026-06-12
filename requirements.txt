@@ -11,13 +11,9 @@ langchain-huggingface==0.0.3
 faiss-cpu==1.14.2
 sentence-transformers==5.5.1
 
-huggingface_hub==0.36.2
-transformers==4.57.6
-
-torch==2.7.1
+transformers
+torch
 
 PyPDF2==3.0.1
-pypdf==6.12.2
-
-reportlab==4.5.1
 python-dotenv==1.2.2
+reportlab==4.5.1
