@@ -484,7 +484,7 @@ def main():
                 st.warning("Knowledge base missing. Please reprocess PDFs.")
                 print(e)
 
-    st.header("Chat with multiple PDFs :books:")
+    st.header("Chat with  PDFs :books:")
     if st.session_state.ready:
         st.success("🤖 AI Assistant Ready")
     if "pdf_name" in st.session_state:
