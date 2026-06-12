@@ -1,10 +1,6 @@
 streamlit==1.58.0
 streamlit-chat==0.1.1
 
-python-dotenv==1.2.2
-PyPDF2==3.0.1
-reportlab==4.5.1
-
 langchain==0.1.20
 langchain-community==0.0.38
 langchain-core==0.1.52
@@ -18,10 +14,10 @@ sentence-transformers==5.5.1
 huggingface_hub==0.36.2
 transformers==4.57.6
 
-torch==2.12.0
+torch==2.7.1
 
-numpy==1.26.4
-pandas==3.0.3
+PyPDF2==3.0.1
+pypdf==6.12.2
 
-requests==2.34.2
-tqdm==4.67.3
+reportlab==4.5.1
+python-dotenv==1.2.2
