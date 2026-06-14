@@ -77,7 +77,7 @@ def get_relevant_context(query):
 
     retriever = load_vectorstore(f"{project_folder}/faiss_index").as_retriever(
         search_type="similarity",
-        search_kwargs={"k": 8}
+        search_kwargs={"k": 5}
     )
     docs = retriever.invoke(query)
 
@@ -202,7 +202,7 @@ def get_conversation_chain(vectorstore):
         llm=llm,
         retriever= vectorstore.as_retriever(
             search_type="similarity",
-            search_kwargs={"k": 10}
+            search_kwargs={"k": 5}
         ),
         memory=memory,
         return_source_documents=True
@@ -328,7 +328,9 @@ def generate_summary():
 
 def generate_report():
 
-    context = format_documents_for_llm()
+    context = get_relevant_context(
+        "Generate a detailed report"
+    )
     prompt = """
     Return ONLY a JSON object.
 
@@ -365,7 +367,7 @@ def generate_report():
     }
 
     Document:
-    """ + context[:12000]
+    """ + context[:5000]
 
     response = generate_report_raw(prompt)
 
@@ -413,7 +415,7 @@ def get_recent_projects():
 
 def main():
     load_dotenv()
-    st.set_page_config(page_title="KnowledgeHub AI", page_icon="🧠", layout="centered")
+    st.set_page_config(page_title="KnowledgeHub AI", page_icon="🧠", layout="wide", initial_sidebar_state="expanded")
     st.write(css, unsafe_allow_html=True)
     
     if "summary" not in st.session_state:
@@ -442,7 +444,7 @@ def main():
         
     if "report_pdf" not in st.session_state:
         st.session_state.report_pdf = None
-    
+        
     if "pdf_name" not in st.session_state:
         st.session_state.pdf_name = ""
     
@@ -455,10 +457,12 @@ def main():
         with open("documents.pkl", "rb") as f:
             st.session_state.documents = pickle.load(f)
     
+    if "mode" not in st.session_state:
+        st.session_state.mode = "Chat"
            
     if "documents" not in st.session_state:
         st.session_state.documents = []
-
+    project_folder = None
     if (
         "project_name" in st.session_state
         and st.session_state.project_name
@@ -517,8 +521,10 @@ def main():
             "Simplify Document",
             "Expand Section",
             "Bullet Points"
-        ]
+        ], key="mode",
+        index=0
     )
+    
     if mode == "Chat":
         chat_container = st.container(height=400)
         
@@ -789,120 +795,134 @@ def main():
             "Multi-Project Document Intelligence Platform"
         )
         st.divider()
-        # --------- Create Project ---------
-        new_project = st.text_input(
-            "Create New Project"
-        )
-        if st.button("➕ Create Project"):
-            if new_project.strip():
-                project_path = get_project_path(
-                    new_project
-                )
-                os.makedirs(
-                    project_path,
-                    exist_ok=True
-                )
-                st.session_state.project_name = (
-                    new_project
-                )
-                st.success(
-                    f"Created project: {new_project}"
-                )
-                st.rerun()
-
 
         # ---------------------------
         # Open Existing Project
         # ---------------------------
         project_folder=None
         projects = get_projects()
-        st.markdown("### 📂 Open Project")
-        selected_project = st.selectbox(
-            "Select Project",
-            [""] + projects, label_visibility="collapsed",
-            index=(
-                projects.index(
-                    st.session_state.project_name
-                ) + 1
-                if (
-                    "project_name"
-                    in st.session_state
-                    and st.session_state.project_name
-                    in projects
-                )
-                else 0
-            )
-        )
-        if selected_project:
-            st.session_state.project_name = selected_project
-            if "pdf_name" not in st.session_state or not st.session_state.pdf_name:
-                st.session_state.pdf_name = selected_project
-            project_folder = get_project_path(
-                selected_project
-            )
+        if (
+            "project_name" in st.session_state
+            and st.session_state.project_name not in projects
+        ):
+            st.session_state.project_name = None
             
-            metadata = load_metadata(project_folder) 
+        if len(projects) == 0:
+            st.info("No projects found. Create your first project below.")
+            st.session_state.project_name = None
+        if (
+            "project_name" not in st.session_state
+            or st.session_state.project_name not in projects
+        ):
+            if projects:
+                st.session_state.project_name = projects[0]
+        with st.expander(
+            "📁 Projects",
+            expanded=True
+        ):
+            current_index = 0
+            if (
+                "project_name" in st.session_state
+                and st.session_state.project_name in projects
+            ):
+                current_index = projects.index(
+                    st.session_state.project_name
+                )
+
+            selected_project = st.radio(
+                "Choose Project",
+                projects,
+                index=current_index,
+                label_visibility="collapsed"
+            )
+            if selected_project != st.session_state.get(
+                "project_name"
+            ):
+                st.session_state.project_name = (
+                    selected_project
+                )
+                st.rerun()
+              
+        # Default project
+        if (
+            "project_name" not in st.session_state
+            and len(projects) > 0
+        ):
+            st.session_state.project_name = projects[0]
+            
+        # Active project
+        if (
+            "project_name" in st.session_state
+            and st.session_state.project_name is not None
+            and st.session_state.project_name != ""
+        ):
+            project_folder = get_project_path(
+                str(st.session_state.project_name)
+            )
+
+            if (
+                "pdf_name" not in st.session_state
+                or not st.session_state.pdf_name
+            ):
+                st.session_state.pdf_name = (
+                    st.session_state.project_name
+                )
+            metadata = load_metadata(project_folder)
             if metadata:
                 st.markdown("---")
                 st.markdown("## 📂 Active Project")
-                st.markdown(f"### {metadata['project_name']}")
+                st.markdown(
+                    f"### {metadata['project_name']}"
+                )
+
                 c1, c2 = st.columns(2)
+
                 c1.metric(
                     "Docs",
                     metadata["num_documents"]
                 )
+
                 c2.metric(
                     "Chunks",
                     metadata["num_chunks"]
                 )
+
                 st.metric(
                     "Characters",
-                    f"{metadata.get('num_characters'):,}"
+                    f"{metadata.get('num_characters',0):,}"
                 )
+
                 st.caption(
                     f"Created: {metadata['created_at'][:10]}"
                 )
+
                 st.caption(
-                    f"Last Updated: {metadata['last_updated'][:19]}"
+                    f"Updated: {metadata['last_updated'][:19]}"
                 )
                 st.markdown("---")
-
             st.success(
-            f"📁 Active Project: {selected_project}"
+                f"📁 Active Project: {st.session_state.project_name}"
             )
-            
-            st.markdown("### 🕒 Recent Projects")
-            recent_projects = get_recent_projects()
-            for project in recent_projects:
-                if st.button(
-                    project["project_name"],
-                    key=f"recent_{project['project_name']}",
-                    use_container_width=True
-                ):
-                    st.session_state.project_name = (
-                        project["project_name"]
-                    )
-                    st.rerun()
-                    
-            # Load project files
+
             raw_text_file = (
                 f"{project_folder}/raw_text.txt"
             )
+
             documents_file = (
                 f"{project_folder}/documents.pkl"
             )
+
             faiss_path = (
                 f"{project_folder}/faiss_index"
             )
+
             if os.path.exists(raw_text_file):
                 with open(
                     raw_text_file,
                     "r",
                     encoding="utf-8"
                 ) as f:
-                    st.session_state.raw_text = (
-                        f.read()
-                    )
+                    st.session_state.raw_text = f.read()
 
             if os.path.exists(documents_file):
                 try:
@@ -914,14 +934,13 @@ def main():
                             pickle.load(f)
                         )
                 except Exception:
-
                     st.warning(
                         "Could not load saved documents."
-                   )
+                    )
+
             if (
                 os.path.exists(faiss_path)
-                and st.session_state.conversation
-                is None
+                and st.session_state.conversation is None
             ):
                 vectorstore = load_vectorstore(
                     faiss_path
@@ -1043,6 +1062,38 @@ def main():
                 st.success(
                 "    Documents processed successfully."
                 )
+        
+        # --------- Create Project ---------
+        if "new_project" not in st.session_state:
+            st.session_state.new_project = ""
+        new_project = st.text_input(
+            "Create New Project",
+            key="new_project"
+        )
+        if st.button("➕ Create Project"):
+            if st.session_state.new_project.strip():
+                project_name = (
+                    st.session_state.new_project.strip()
+                )
+                project_path = get_project_path(
+                    project_name
+                )
+                os.makedirs(
+                    project_path,
+                    exist_ok=True
+                )
+                # Make new project active
+                st.session_state.project_name = (
+                    project_name
+                )
+                selected_project = project_name
+                st.session_state.pdf_name = (
+                    project_name
+                )
+
+                # Clear input box
+                del st.session_state["new_project"]
+                st.rerun()
 
         # ---------------------------
         # Delete Project
@@ -1063,7 +1114,18 @@ def main():
                 project_folder,
                 ignore_errors=True
             )
-            st.session_state.clear()
+            if (
+                "project_name" in st.session_state
+                and st.session_state.project_name
+            ):
+                del st.session_state["project_name"]
+
+            if "conversation" in st.session_state:
+                del st.session_state["conversation"]
+
+            if "ready" in st.session_state:
+                del st.session_state["ready"]
+            
             st.rerun()
 
         # ---------------------------
