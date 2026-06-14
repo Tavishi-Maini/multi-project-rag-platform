@@ -127,7 +127,6 @@ Groq LLM
 │ Report Generation   │
 └─────────────────────┘
 ```
-
 ---
 
 ## Project Structure
