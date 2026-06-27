@@ -194,7 +194,7 @@ def get_conversation_chain(vectorstore):
     memory= ConversationBufferMemory(memory_key="chat_history", return_messages=True, output_key="answer")
     llm = ChatGroq(
         groq_api_key=os.getenv("GROQ_API_KEY"),
-        model_name= "llama-3.1-8b-instant",
+        model_name= "gpt-oss-20b",
         streaming=True
     )
     #llm= HuggingFaceHub(repo_id="tencent/KaLM-Chat-Gemma3-12B-2511", model_kwargs={"temperature": 0.7, "max_length": 2048})
@@ -212,7 +212,7 @@ def get_conversation_chain(vectorstore):
 def generate_document(prompt):
     llm = ChatGroq(
         groq_api_key=os.getenv("GROQ_API_KEY"),
-        model_name="llama-3.1-8b-instant",
+        model_name="gpt-oss-20b",
         streaming=True
     )
     placeholder = st.empty()
@@ -235,7 +235,7 @@ def generate_document_stream(prompt):
 
     llm = ChatGroq(
         groq_api_key=os.getenv("GROQ_API_KEY"),
-        model_name="llama-3.1-8b-instant"
+        model_name="gpt-oss-20b"
     )
 
     placeholder = st.empty()
@@ -297,7 +297,7 @@ def handle_userinput(user_question):
 def generate_report_raw(prompt):
     llm = ChatGroq(
         groq_api_key=os.getenv("GROQ_API_KEY"),
-        model_name="llama-3.1-8b-instant",
+        model_name="gpt-oss-20b",
         streaming=False
     )
 
