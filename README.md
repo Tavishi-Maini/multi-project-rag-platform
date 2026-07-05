@@ -10,6 +10,16 @@ Unlike traditional "Chat with PDF" applications, KnowledgeHub AI organizes docum
 
 ---
 
+## 🚀 Live Demo
+
+**Try the application here:**
+
+**🌐 https://multi-project-rag-platform.streamlit.app/**
+
+Experience the platform without any local setup. Create projects, upload multiple PDFs, ask questions, generate summaries and reports, and explore Retrieval-Augmented Generation (RAG) in action through an interactive web interface.
+
+---
+
 ## Problem Statement
 
 Professionals, researchers, and students often work with large collections of documents spread across different topics. Finding relevant information manually is time-consuming and inefficient.
@@ -127,6 +137,7 @@ Groq LLM
 │ Report Generation   │
 └─────────────────────┘
 ```
+
 ---
 
 ## Project Structure
@@ -170,7 +181,9 @@ Each project stores:
 
 ## Deployment
 
-The application is deployed on Streamlit Community Cloud.
+**Live Application:** https://multi-project-rag-platform.streamlit.app/
+
+The application is deployed on **Streamlit Community Cloud** and is publicly accessible through the link above.
 
 Environment variables:
 
@@ -197,7 +210,7 @@ Store secrets securely using Streamlit Secrets and never commit API keys to the 
 
 ## Author
 
-Tavishi Maini
+**Tavishi Maini**
 
 IIT Kanpur
 
