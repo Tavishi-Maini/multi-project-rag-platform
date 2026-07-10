@@ -176,7 +176,6 @@ def get_document_chunks(pdf_docs):
     return documents
 
     
-    
 def format_documents_for_llm():
     formatted_text = ""
 
